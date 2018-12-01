@@ -42,14 +42,19 @@ func failResponse(wr http.ResponseWriter, httpStatus int, reason string) {
 }
 
 func storePostTemp(inp io.Reader) (retFile *os.File, retErr error) {
-	file, err := ioutil.TempFile("", "dagverso-temp")
+	tmpFile, err := ioutil.TempFile("", "dagverso-temp")
+	if err != nil {
+		log.Printf("ERROR: failed to create temp: %s", err.Error())
+		retErr = err
+		return
+	}
 	buffer := make([]byte, 255)
-	log.Printf("DEBUG: temp file for post: %s", file.Name())
+	//log.Printf("DEBUG: temp file for post: %s", tmpFile.Name())
 	defer func() {
-		if file != nil && err != nil {
-			file.Close()
-			os.Remove(file.Name())
-			retErr = err
+		if retFile != nil && retErr != nil {
+			log.Printf("INFO: removing temp file %s", retFile.Name())
+			retFile.Close()
+			os.Remove(retFile.Name())
 			retFile = nil
 		}
 	}()
@@ -58,15 +63,24 @@ func storePostTemp(inp io.Reader) (retFile *os.File, retErr error) {
 		nr, err := inp.Read(buffer)
 		if err != nil {
 			if err == io.EOF {
-				_, err = retFile.Write(buffer[:nr])
+				log.Printf("DEBUG: will write %d bytes", nr)
+				_, err = tmpFile.Write(buffer[:nr])
+				if err != nil {
+					log.Printf("ERROR: error writing to temp: %s", err.Error())
+					retErr = err
+					return nil, err
+				}
+				return tmpFile, nil
 			}
-			retErr = err
-			return
+			log.Printf("ERROR: error reading POST: %s", err.Error())
+			return nil, err
 		}
-		_, err = retFile.Write(buffer[:nr])
+		log.Printf("DEBUG: will write %d bytes", nr)
+		_, err = tmpFile.Write(buffer[:nr])
 		if err != nil {
+			log.Printf("ERROR: error writing to temp: %s", err.Error())
 			retErr = err
-			return
+			return nil, err
 		}
 	}
 }
@@ -135,21 +149,24 @@ func computeHashId(inp io.Reader) (string, error) {
 			}
 			return "", err
 		}
-		hash.Update(buffer)
+		hash.Update(buffer[:nr])
 	}
 }
 
 func configure() {
 
 }
+
 func main() {
 	configure()
 	router := mux.NewRouter()
 	apiV1Router := router.PathPrefix("/api/v1").Subrouter()
 
-	apiV1Router.Methods(http.MethodPost).Path("/{hashId:[a-zA-Z0-9_-]{44}}").HandlerFunc(handleTargetedPost)
+	apiV1Router.Methods(http.MethodPost).Path("/{hashId:[a-zA-Z0-9]{45}}").HandlerFunc(handleTargetedPost)
 	apiV1Router.Methods(http.MethodPost).Path("/").HandlerFunc(handleBlindPost)
 
-	http.ListenAndServe(":8087", handlers.CORS()(router))
+	listenUrl := ":8087"
+	fmt.Printf("Will listen on :%s", listenUrl)
+	http.ListenAndServe(listenUrl, handlers.CORS()(router))
 
 }

@@ -2,7 +2,6 @@ package hash
 
 import (
 	sha2_256 "crypto/sha256"
-	"fmt"
 	"hash"
 
 	"github.com/btcsuite/btcutil/base58"
@@ -24,12 +23,14 @@ type Hash struct {
 }
 
 func InitHash() *Hash {
+	//log.Printf("DEBUG: initing hash")
 	return &Hash{
 		hash: sha2_256.New(),
 	}
 }
 
 func (hash *Hash) Update(data []byte) error {
+	//log.Printf("DEBUG: hashing data %d", len(data))
 	_, err := hash.hash.Write(data)
 	return err
 }
@@ -39,8 +40,12 @@ func (hash *Hash) FinalId() string {
 }
 
 func (hash *Hash) FinalHash() []byte {
+	//log.Printf("DEBUG: finishing hash")
 	sha2Hash := hash.hash.Sum(nil)
-	fmt.Printf("---sha2 hash %s\n", base58.Encode(sha2Hash[:]))
+	//dst := make([]byte, hex.EncodedLen(len(sha2Hash)))
+	//hex.Encode(dst, sha2Hash[:])
+	//fmt.Printf("---sha2 hash b58 %s\n", base58.Encode(sha2Hash[:]))
+	//fmt.Printf("---sha2 hash hex %s\n", dst)
 	sha3Hash := sha3.Sum256(sha2Hash)
 	return sha3Hash[:]
 }
@@ -49,7 +54,7 @@ func (hash *Hash) FinalHash() []byte {
 // Output=sha3_256(sha2_256(data))
 func ComputeHashFromBytes(data []byte) []byte {
 	sha2Hash := sha2_256.Sum256(data)
-	fmt.Printf("sha2 hash %s\n", base58.Encode(sha2Hash[:]))
+	//fmt.Printf("sha2 hash %s\n", base58.Encode(sha2Hash[:]))
 	sha3Hash := sha3.Sum256(sha2Hash[:])
 	return sha3Hash[:]
 }
