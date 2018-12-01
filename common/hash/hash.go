@@ -2,11 +2,15 @@ package hash
 
 import (
 	sha2_256 "crypto/sha256"
+	"errors"
 	"hash"
+	"io"
 
 	"github.com/btcsuite/btcutil/base58"
 	sha3 "golang.org/x/crypto/sha3"
 )
+
+const DvrsVersion = 0x42
 
 // Computes object identifier based on hash. For current version it starts with D.
 // D means - use sha3_256(sha2_256(data))
@@ -27,6 +31,10 @@ func InitHash() *Hash {
 	return &Hash{
 		hash: sha2_256.New(),
 	}
+}
+
+func New() *Hash {
+	return InitHash()
 }
 
 func (hash *Hash) Update(data []byte) error {
@@ -59,7 +67,34 @@ func ComputeHashFromBytes(data []byte) []byte {
 	return sha3Hash[:]
 }
 
+func ComputeHashFromReader(inp io.Reader) ([]byte, error) {
+	hash := New()
+	buffer := make([]byte, 4096)
+	for {
+		nr, err := inp.Read(buffer)
+		if err != nil {
+			if err == io.EOF {
+				hash.Update(buffer[:nr])
+				return hash.FinalHash(), nil
+			}
+			return nil, err
+		}
+		hash.Update(buffer[:nr])
+	}
+}
+
 //Encodes hash to string identifier
 func EncodeHash(hash []byte) string {
-	return "D" + base58.Encode(hash)
+	final := make([]byte, len(hash)+1)
+	copy(final[1:], hash)
+	final[0] = DvrsVersion
+	return base58.Encode(final)
+}
+
+func DecodeHash(hashId string) ([]byte, error) {
+	decoded := base58.Decode(hashId)
+	if decoded[0] != DvrsVersion {
+		return nil, errors.New("bad dvrs hash version byte. decoded hashId shoild start with 0x42")
+	}
+	return decoded[1:], nil
 }

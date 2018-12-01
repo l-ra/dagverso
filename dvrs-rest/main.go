@@ -10,7 +10,7 @@ import (
 
 	handlers "github.com/gorilla/handlers"
 	mux "github.com/gorilla/mux"
-	dagversehash "github.com/l-ra/dagverso/common/hash"
+	"github.com/l-ra/dagverso/common/hash"
 )
 
 /*
@@ -94,11 +94,11 @@ func processPostBody(inp *os.File) (retHashId string, retErr error) {
 		}
 	}()
 
-	hashId, err := computeHashId(inp)
+	hashBytes, err := hash.ComputeHashFromReader(inp)
 	if err != nil {
 		return "", err
 	}
-	return hashId, nil
+	return hash.EncodeHash(hashBytes), nil
 }
 
 func handleTargetedPost(wr http.ResponseWriter, req *http.Request) {
@@ -137,22 +137,6 @@ func handleBlindPost(wr http.ResponseWriter, req *http.Request) {
 	wr.WriteHeader(http.StatusOK)
 }
 
-func computeHashId(inp io.Reader) (string, error) {
-	hash := dagversehash.InitHash()
-	buffer := make([]byte, 255)
-	for {
-		nr, err := inp.Read(buffer)
-		if err != nil {
-			if err == io.EOF {
-				hash.Update(buffer[:nr])
-				return hash.FinalId(), nil
-			}
-			return "", err
-		}
-		hash.Update(buffer[:nr])
-	}
-}
-
 func configure() {
 
 }
@@ -162,7 +146,7 @@ func main() {
 	router := mux.NewRouter()
 	apiV1Router := router.PathPrefix("/api/v1").Subrouter()
 
-	apiV1Router.Methods(http.MethodPost).Path("/{hashId:[a-zA-Z0-9]{45}}").HandlerFunc(handleTargetedPost)
+	apiV1Router.Methods(http.MethodPost).Path("/{hashId:L[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{44}}").HandlerFunc(handleTargetedPost)
 	apiV1Router.Methods(http.MethodPost).Path("/").HandlerFunc(handleBlindPost)
 
 	listenUrl := ":8087"
