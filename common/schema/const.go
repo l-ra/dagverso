@@ -1,3 +1,4 @@
 package schema
 
 const EnvelopeSchemaHashID = "LgpLmBJCYBmba2XhGyrA6TpVfJrGpaD2VtD3hdaizrCVf"
+const BasicMetaSchemaHashID = "Le2DjYsJQFTj7wDZYqG82hqxt1LWs8fvANgLsg8EvMXgF"
