@@ -1,0 +1,118 @@
+{
+    "name": "dagverso.basicmeta",
+    "type": "record",
+    "fields": [
+        {
+            "name": "title",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "creator",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "subject",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "description",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "publisher",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "contributor",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "date",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "type",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "format",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "identifier",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "source",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "language",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "relation_hash",
+            "type": [
+                "null",
+                {
+                    "type": "array",
+                    "items": "bytes"
+                }
+            ]
+        },
+        {
+            "name": "coverage",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "rights",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "entity_hash",
+            "type": "bytes"
+        }
+    ]
+}

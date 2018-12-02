@@ -1,0 +1,1 @@
+{"name":"dagverso.envelope","type":"record","fields":[{"name":"magic","type":{"name":"dagverso.magic","type":"fixed","size":4}},{"name":"schema_hash","type":"bytes"},{"name":"data","type":"bytes"}]}
